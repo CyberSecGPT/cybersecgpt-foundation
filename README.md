@@ -3,6 +3,8 @@
 **Project status: Alpha (0.1.0).** The package is under active development.
 Public APIs may change before a stable release.
 
+**Repository lifecycle: Bootstrap.** No public release has been approved.
+
 `cybersecgpt-foundation` is the dependency-light shared Python foundation for
 the CyberSecGPT platform. It provides a common home for cross-cutting contracts
 and primitives that can be reused without depending on another CyberSecGPT
@@ -52,6 +54,19 @@ The current foundation API provides:
 
 These primitives use only the Python standard library and remain intentionally
 independent of application frameworks and other CyberSecGPT repositories.
+
+## Edition positioning
+
+`cybersecgpt-foundation` is shared Community-layer infrastructure. Its public
+primitives are available to Community and may be consumed unchanged by
+Professional and Enterprise extensions. This repository contains no premium
+feature implementation, entitlement enforcement, or edition-specific business
+logic.
+
+The version-controlled availability record is
+[docs/EDITION_MATRIX.md](docs/EDITION_MATRIX.md). Feature placement requires
+product-governance approval before implementation; it is not decided through
+scattered edition checks in foundation code.
 
 ## Development installation
 
@@ -109,18 +124,32 @@ python -m black .
 Run strict type checking:
 
 ```bash
-python -m mypy src
+python -m mypy src scripts
+```
+
+Validate documentation and repository security boundaries:
+
+```bash
+python scripts/validate_repository.py
+python -m pip check
 ```
 
 Build the distribution artifacts:
 
 ```bash
 python -m build
+python scripts/verify_distribution.py dist
 ```
 
 ## Package structure
 
 ```text
+docs/
+├── ARCHITECTURE.md
+└── EDITION_MATRIX.md
+scripts/
+├── validate_repository.py
+└── verify_distribution.py
 src/
 └── cybersecgpt/
     ├── __init__.py
@@ -150,7 +179,30 @@ tests/
 The top-level `cybersecgpt` package and the `cybersecgpt.foundation` package
 both expose the package version.
 
+## Founder and Maintainers
+
+### Founder
+
+The CyberSecGPT Founder retains final authority over the project vision,
+architectural direction, licensing strategy, and commercial direction.
+
+### Chief Architect
+
+The CyberSecGPT Chief Architect is responsible for architecture consistency,
+technical direction, engineering quality, and coordination across
+repositories.
+
+### Maintainers
+
+The CyberSecGPT Team maintains `cybersecgpt-foundation`. Repository maintainers
+are responsible for technical review, quality gates, documentation health,
+security coordination, and release approval. Changes reach protected branches
+only through the governed review process.
+
 ## Architecture governance
+
+Repository-level architecture is documented in
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 Cross-repository architecture, architectural decisions, dependency direction,
 and platform-level contracts are governed in
@@ -168,4 +220,7 @@ no runtime or package dependency on `cybersecgpt-docs`.
 
 ## License
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE).
+This project follows a source-available licensing model under the planned
+CyberSecGPT Community Source License (CSL) Version 1.0. The final approved
+license text will be supplied by the project owner before the first public
+release. See [LICENSE](LICENSE) for the current licensing notice.

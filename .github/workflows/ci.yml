@@ -4,9 +4,13 @@ on:
   pull_request:
     branches:
       - main
+      - "release/**"
+      - "hotfix/**"
   push:
     branches:
       - main
+      - "release/**"
+      - "hotfix/**"
 
 permissions:
   contents: read
@@ -42,7 +46,13 @@ jobs:
         run: python -m black --check .
 
       - name: Run mypy
-        run: python -m mypy src
+        run: python -m mypy src scripts
+
+      - name: Validate documentation and repository security
+        run: python scripts/validate_repository.py
+
+      - name: Check installed dependency consistency
+        run: python -m pip check
 
       - name: Run tests with coverage
         run: >-
@@ -73,3 +83,6 @@ jobs:
 
       - name: Build distributions
         run: python -m build
+
+      - name: Verify distribution boundaries
+        run: python scripts/verify_distribution.py dist

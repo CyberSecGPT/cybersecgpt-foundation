@@ -35,15 +35,17 @@ systems you were not authorized to test.
 
 ## Supported versions
 
-During the alpha phase, only the latest published `0.1.x` release receives
-security fixes.
+The repository is in its Bootstrap lifecycle stage and has no public release.
+Security reports against the current repository state are accepted and
+prioritized, but no released version is currently supported.
 
-| Version | Supported |
+| Version or state | Support status |
 | --- | --- |
-| Latest published `0.1.x` release | Yes |
-| Earlier releases | No |
+| Current repository state | Pre-release security review |
+| Public releases | None published |
 
-Security updates may require upgrading to the latest release.
+This table will be updated before the first public release. After releases
+begin, security updates may require upgrading to the newest supported version.
 
 ## Responsible disclosure
 
