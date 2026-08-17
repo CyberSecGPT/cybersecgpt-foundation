@@ -22,6 +22,7 @@ from .security import (
     AuditMetadata,
     AuditOutcome,
     AuditSeverity,
+    EvidenceRef,
     SecurityContext,
 )
 from .serialization import from_json, to_json
@@ -55,6 +56,7 @@ __all__ = [
     "AuditMetadata",
     "AuditOutcome",
     "AuditSeverity",
+    "EvidenceRef",
     "SecurityContext",
     "JsonArray",
     "JsonObject",

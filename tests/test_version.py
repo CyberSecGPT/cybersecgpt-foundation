@@ -24,6 +24,7 @@ EXPECTED_FOUNDATION_EXPORTS = {
     "AuditMetadata",
     "AuditOutcome",
     "AuditSeverity",
+    "EvidenceRef",
     "SecurityContext",
     "JsonArray",
     "JsonObject",

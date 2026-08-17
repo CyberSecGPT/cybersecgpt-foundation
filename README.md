@@ -48,6 +48,8 @@ The current foundation API provides:
 - Immutable typed identifiers with UUID4 generation.
 - Immutable `SecurityContext` for opaque actor and trace identity.
 - Immutable audit-event contracts for structured security-relevant records.
+- Immutable `EvidenceRef` contracts for evidence provenance and integrity
+  references without retrieval or verification behavior.
 - String and integer validation helpers.
 - Deterministic JSON serialization and deserialization.
 - Idempotent, opt-in logging configuration and validated logger lookup.
@@ -164,7 +166,8 @@ src/
         ├── security/
         │   ├── __init__.py
         │   ├── audit.py
-        │   └── context.py
+        │   ├── context.py
+        │   └── evidence.py
         ├── serialization.py
         ├── typing.py
         ├── utils.py
@@ -178,6 +181,7 @@ tests/
 ├── test_repository_policy.py
 ├── test_security_audit.py
 ├── test_security_context.py
+├── test_security_evidence.py
 ├── test_serialization.py
 ├── test_typing.py
 ├── test_utils.py

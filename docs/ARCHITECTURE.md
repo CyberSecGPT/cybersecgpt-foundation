@@ -64,6 +64,8 @@ The package owns small, stable, cross-cutting Python primitives:
 - immutable identifiers
 - immutable security-context contracts for opaque actor and trace identity
 - immutable audit-event contracts for structured security-relevant records
+- immutable evidence-reference contracts for opaque evidence provenance and
+  integrity references
 - reusable validation helpers
 - deterministic JSON conversion
 - opt-in logging configuration
@@ -90,7 +92,8 @@ src/cybersecgpt/
     ├── security/
     │   ├── __init__.py
     │   ├── audit.py
-    │   └── context.py
+    │   ├── context.py
+    │   └── evidence.py
     ├── serialization.py
     ├── typing.py
     ├── utils.py
@@ -112,6 +115,7 @@ under `docs/`, and automation lives under `scripts/` and `.github/`.
 | `serialization` | Deterministic JSON encoding and decoding |
 | `security.context` | Immutable opaque actor and trace context |
 | `security.audit` | Immutable structured audit-event contracts |
+| `security.evidence` | Immutable evidence provenance and integrity references |
 | `logging` | Explicit root configuration and validated logger lookup |
 | `typing` | Recursive JSON-compatible type aliases |
 | `utils` | Timezone-aware UTC values and ISO 8601 text |
@@ -128,11 +132,12 @@ flow toward shared validation and errors:
 
 ```text
 identifiers ──────→ exceptions
-validation ──────→ exceptions
+validation ───────→ exceptions
 serialization ────→ constants, exceptions, validation
 security.context ─→ identifiers, validation
 security.audit ───→ identifiers, serialization, typing, utils, validation, security.context
-logging ─────────→ validation
+security.evidence ─→ serialization, typing, validation
+logging ──────────→ validation
 ```
 
 The package initializers re-export public objects but contain no application
@@ -163,6 +168,11 @@ whether an operation is authorized. Audit metadata is defensively immutable
 and canonicalized through the shared deterministic JSON serializer. Metadata
 is not automatically redacted, so callers remain responsible for excluding
 credentials, secrets, tokens, and inappropriate sensitive data.
+
+`EvidenceRef` describes an evidence source, opaque locator, digest algorithm,
+digest value, and optional media type. Foundation does not retrieve evidence,
+read files, access storage, fetch URLs, compute hashes, validate digest
+algorithms, or verify that referenced evidence matches a supplied digest.
 
 ## Dependencies and portability
 

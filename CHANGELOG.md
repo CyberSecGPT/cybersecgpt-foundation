@@ -15,6 +15,8 @@ maintainer approval and must satisfy the repository quality gates.
 - Immutable audit-event contracts with typed identity, UTC timestamps,
   severity and outcome enums, immutable JSON metadata, and deterministic
   serialization/deserialization.
+- Immutable `EvidenceRef` contract for opaque evidence location, digest,
+  algorithm, source, and optional media-type metadata.
 - Unit tests with full statement and branch coverage.
 - Continuous integration across Python 3.11, 3.12, and 3.13.
 - Repository governance, security, contribution, and architecture

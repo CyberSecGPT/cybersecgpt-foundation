@@ -8,6 +8,7 @@ from .audit import (
     AuditSeverity,
 )
 from .context import SecurityContext
+from .evidence import EvidenceRef
 
 __all__ = [
     "AuditEvent",
@@ -15,5 +16,6 @@ __all__ = [
     "AuditMetadata",
     "AuditOutcome",
     "AuditSeverity",
+    "EvidenceRef",
     "SecurityContext",
 ]
