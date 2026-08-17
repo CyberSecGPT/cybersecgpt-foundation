@@ -1,5 +1,9 @@
 """Conservative public API for shared CyberSecGPT foundation primitives."""
 
+from .configuration import (
+    Configuration,
+    configuration_environment_name,
+)
 from .constants import (
     DEFAULT_ENCODING,
     DEFAULT_JSON_INDENT,
@@ -54,6 +58,8 @@ __all__ = [
     "MAX_JSON_PAYLOAD_CHARS",
     "MAX_JSON_STRING_CHARS",
     "MAX_JSON_TOTAL_NODES",
+    "Configuration",
+    "configuration_environment_name",
     "FoundationError",
     "ConfigurationError",
     "ValidationError",

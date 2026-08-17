@@ -19,6 +19,8 @@ maintainer approval and must satisfy the repository quality gates.
   algorithm, source, and optional media-type metadata.
 - Public defensive JSON safety-bound constants for payload size, nesting,
   container size, node count, string values, and object keys.
+- Immutable configuration mapping with strict typed boolean and integer
+  accessors plus canonical CyberSecGPT environment-variable names.
 - Unit tests with full statement and branch coverage.
 - Continuous integration across Python 3.11, 3.12, and 3.13.
 - Repository governance, security, contribution, and architecture

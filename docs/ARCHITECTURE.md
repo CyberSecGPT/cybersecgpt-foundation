@@ -66,6 +66,7 @@ The package owns small, stable, cross-cutting Python primitives:
 - immutable audit-event contracts for structured security-relevant records
 - immutable evidence-reference contracts for opaque evidence provenance and
   integrity references
+- immutable configuration mappings with strict typed accessors
 - reusable validation helpers
 - deterministic and defensively bounded JSON conversion
 - opt-in logging configuration
@@ -86,6 +87,7 @@ src/cybersecgpt/
 └── foundation/
     ├── __init__.py
     ├── constants.py
+    ├── configuration.py
     ├── exceptions.py
     ├── identifiers.py
     ├── logging.py
@@ -109,6 +111,7 @@ under `docs/`, and automation lives under `scripts/` and `.github/`.
 | Module | Responsibility |
 | --- | --- |
 | `constants` | Stable project, serialization defaults, and JSON safety ceilings |
+| `configuration` | Immutable configuration mapping and strict typed accessors |
 | `exceptions` | Domain-specific foundation error hierarchy |
 | `identifiers` | Immutable string identifiers and UUID4 generation |
 | `validation` | Shared structural string and integer validation |
@@ -133,6 +136,7 @@ flow toward shared validation and errors:
 ```text
 identifiers ──────→ exceptions
 validation ───────→ exceptions
+configuration ────→ constants, exceptions
 serialization ────→ constants, exceptions, validation
 security.context ─→ identifiers, validation
 security.audit ───→ identifiers, serialization, typing, utils, validation, security.context
@@ -150,6 +154,15 @@ values are not required to use UUID syntax; UUID4 is used only by `new()`.
 
 Validation helpers return accepted values unchanged and raise
 `ValidationError` with field-specific messages.
+
+`Configuration` stores a defensive immutable copy of canonical lower-snake-
+case keys and opaque string values. Foundation does not automatically read
+process environment variables, `.env` files, YAML, TOML, secret stores, or
+credential providers. Boolean access accepts only `true` and `false`, and
+integer access accepts strict base-10 text. Environment-variable names are
+derived from the shared `CYBERSECGPT_` prefix without reading or modifying
+the process environment. Configuration does not implement licensing,
+entitlements, feature gating, authorization, or secret management.
 
 JSON serialization sorts mapping keys, preserves Unicode, and converts
 standard-library codec failures into `SerializationError` while retaining the

@@ -51,6 +51,8 @@ The current foundation API provides:
 - Immutable `EvidenceRef` contracts for evidence provenance and integrity
   references without retrieval or verification behavior.
 - String and integer validation helpers.
+- Immutable configuration mapping with strict typed accessors and canonical
+  environment-variable naming without automatic environment loading.
 - Deterministic JSON serialization and deserialization with defensive
   payload and structural bounds.
 - Idempotent, opt-in logging configuration and validated logger lookup.
@@ -180,6 +182,7 @@ src/
     └── foundation/
         ├── __init__.py
         ├── constants.py
+        ├── configuration.py
         ├── exceptions.py
         ├── identifiers.py
         ├── logging.py
@@ -195,6 +198,7 @@ src/
         └── version.py
 tests/
 ├── test_constants.py
+├── test_configuration.py
 ├── test_exceptions.py
 ├── test_identifiers.py
 ├── test_logging.py

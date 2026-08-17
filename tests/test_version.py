@@ -16,6 +16,8 @@ EXPECTED_FOUNDATION_EXPORTS = {
     "MAX_JSON_PAYLOAD_CHARS",
     "MAX_JSON_STRING_CHARS",
     "MAX_JSON_TOTAL_NODES",
+    "Configuration",
+    "configuration_environment_name",
     "FoundationError",
     "ConfigurationError",
     "ValidationError",

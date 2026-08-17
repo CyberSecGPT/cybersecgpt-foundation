@@ -62,6 +62,7 @@ EXPECTED_PACKAGE_FILES = frozenset(
         "cybersecgpt/__init__.py",
         "cybersecgpt/foundation/__init__.py",
         "cybersecgpt/foundation/constants.py",
+        "cybersecgpt/foundation/configuration.py",
         "cybersecgpt/foundation/exceptions.py",
         "cybersecgpt/foundation/identifiers.py",
         "cybersecgpt/foundation/logging.py",
@@ -81,6 +82,7 @@ EXPECTED_TEST_FILES = frozenset(
     {
         "tests/__init__.py",
         "tests/test_constants.py",
+        "tests/test_configuration.py",
         "tests/test_exceptions.py",
         "tests/test_identifiers.py",
         "tests/test_logging.py",
