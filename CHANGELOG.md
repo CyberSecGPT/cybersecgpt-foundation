@@ -17,6 +17,8 @@ maintainer approval and must satisfy the repository quality gates.
   serialization/deserialization.
 - Immutable `EvidenceRef` contract for opaque evidence location, digest,
   algorithm, source, and optional media-type metadata.
+- Public defensive JSON safety-bound constants for payload size, nesting,
+  container size, node count, string values, and object keys.
 - Unit tests with full statement and branch coverage.
 - Continuous integration across Python 3.11, 3.12, and 3.13.
 - Repository governance, security, contribution, and architecture
@@ -32,6 +34,8 @@ maintainer approval and must satisfy the repository quality gates.
   Source License (CSL) Version 1.0.
 - Export JSON-compatible typing aliases from the public `cybersecgpt.foundation`
   API to match documented edition availability.
+- JSON serialization and deserialization now enforce package-wide defensive
+  payload and structural safety ceilings.
 - Bound development and build dependency versions for more stable CI
   resolution.
 - Accept PEP-compliant Core Metadata versions 2.4 and newer within major

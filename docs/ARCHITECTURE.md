@@ -67,7 +67,7 @@ The package owns small, stable, cross-cutting Python primitives:
 - immutable evidence-reference contracts for opaque evidence provenance and
   integrity references
 - reusable validation helpers
-- deterministic JSON conversion
+- deterministic and defensively bounded JSON conversion
 - opt-in logging configuration
 - JSON-compatible typing aliases
 - timezone-aware UTC helpers
@@ -108,11 +108,11 @@ under `docs/`, and automation lives under `scripts/` and `.github/`.
 
 | Module | Responsibility |
 | --- | --- |
-| `constants` | Stable project and serialization defaults |
+| `constants` | Stable project, serialization defaults, and JSON safety ceilings |
 | `exceptions` | Domain-specific foundation error hierarchy |
 | `identifiers` | Immutable string identifiers and UUID4 generation |
 | `validation` | Shared structural string and integer validation |
-| `serialization` | Deterministic JSON encoding and decoding |
+| `serialization` | Deterministic and defensively bounded JSON encoding and decoding |
 | `security.context` | Immutable opaque actor and trace context |
 | `security.audit` | Immutable structured audit-event contracts |
 | `security.evidence` | Immutable evidence provenance and integrity references |
@@ -153,7 +153,12 @@ Validation helpers return accepted values unchanged and raise
 
 JSON serialization sorts mapping keys, preserves Unicode, and converts
 standard-library codec failures into `SerializationError` while retaining the
-original cause.
+original cause. Encoding and decoding enforce package-wide safety ceilings of
+1,048,576 payload characters, 64 nested container levels, 10,000 items per
+container, 100,000 total JSON value nodes, 262,144 characters per string
+value, and 4,096 characters per object key. Payload size is measured in Python
+string characters rather than encoded bytes. These are Foundation safety
+ceilings, not edition, entitlement, subscription, or licensing limits.
 
 Logging configuration is opt-in. It configures the root logger only when no
 handlers exist, preserving application ownership of logging destinations.

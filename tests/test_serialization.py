@@ -4,6 +4,14 @@ import json
 
 import pytest
 
+from cybersecgpt.foundation.constants import (
+    MAX_JSON_CONTAINER_ITEMS,
+    MAX_JSON_DEPTH,
+    MAX_JSON_KEY_CHARS,
+    MAX_JSON_PAYLOAD_CHARS,
+    MAX_JSON_STRING_CHARS,
+    MAX_JSON_TOTAL_NODES,
+)
 from cybersecgpt.foundation.exceptions import SerializationError, ValidationError
 from cybersecgpt.foundation.serialization import from_json, to_json
 
@@ -85,3 +93,227 @@ def test_serialization_exports_are_explicit() -> None:
     from cybersecgpt.foundation import serialization
 
     assert serialization.__all__ == ["to_json", "from_json"]
+
+
+def _nested_array(depth: int) -> object:
+    value: object = 0
+
+    for _ in range(depth):
+        value = [value]
+
+    return value
+
+
+def _node_boundary_value(*, over_limit: bool = False) -> list[object]:
+    container_nodes = 1 + MAX_JSON_CONTAINER_ITEMS
+    scalar_nodes = MAX_JSON_TOTAL_NODES - container_nodes
+    base_items, extra_items = divmod(
+        scalar_nodes,
+        MAX_JSON_CONTAINER_ITEMS,
+    )
+
+    groups: list[object] = [
+        [0] * (base_items + (1 if index < extra_items else 0))
+        for index in range(MAX_JSON_CONTAINER_ITEMS)
+    ]
+
+    if over_limit:
+        last_group = groups[-1]
+        assert isinstance(last_group, list)
+        last_group.append(0)
+
+    return groups
+
+
+def test_from_json_accepts_exact_payload_character_limit() -> None:
+    payload = "[0" + (" " * (MAX_JSON_PAYLOAD_CHARS - 3)) + "]"
+
+    assert len(payload) == MAX_JSON_PAYLOAD_CHARS
+    assert from_json(payload) == [0]
+
+
+def test_from_json_rejects_payload_above_character_limit() -> None:
+    payload = "[0" + (" " * (MAX_JSON_PAYLOAD_CHARS - 2)) + "]"
+
+    assert len(payload) == MAX_JSON_PAYLOAD_CHARS + 1
+
+    with pytest.raises(
+        SerializationError,
+        match="payload size",
+    ):
+        from_json(payload)
+
+
+def test_to_json_accepts_exact_payload_character_limit() -> None:
+    value = [
+        "a" * MAX_JSON_STRING_CHARS,
+        "b" * MAX_JSON_STRING_CHARS,
+        "c" * MAX_JSON_STRING_CHARS,
+        "d" * (MAX_JSON_STRING_CHARS - 16),
+    ]
+
+    payload = to_json(value, indent=None)
+
+    assert len(payload) == MAX_JSON_PAYLOAD_CHARS
+
+
+def test_to_json_rejects_output_above_character_limit() -> None:
+    value = [
+        "a" * MAX_JSON_STRING_CHARS,
+        "b" * MAX_JSON_STRING_CHARS,
+        "c" * MAX_JSON_STRING_CHARS,
+        "d" * (MAX_JSON_STRING_CHARS - 15),
+    ]
+
+    with pytest.raises(
+        SerializationError,
+        match="payload size",
+    ):
+        to_json(value, indent=None)
+
+
+def test_json_accepts_exact_nesting_depth_limit() -> None:
+    value = _nested_array(MAX_JSON_DEPTH)
+    payload = to_json(value, indent=None)
+
+    assert from_json(payload) == value
+
+
+def test_json_rejects_nesting_above_depth_limit() -> None:
+    value = _nested_array(MAX_JSON_DEPTH + 1)
+
+    with pytest.raises(
+        SerializationError,
+        match="nesting depth",
+    ):
+        to_json(value, indent=None)
+
+    payload = "[" * (MAX_JSON_DEPTH + 1) + "0" + "]" * (MAX_JSON_DEPTH + 1)
+
+    with pytest.raises(
+        SerializationError,
+        match="nesting depth",
+    ):
+        from_json(payload)
+
+
+def test_json_accepts_exact_container_item_limit() -> None:
+    value = [0] * MAX_JSON_CONTAINER_ITEMS
+    payload = to_json(value, indent=None)
+
+    assert len(from_json(payload)) == MAX_JSON_CONTAINER_ITEMS
+
+
+def test_json_rejects_container_above_item_limit() -> None:
+    value = [0] * (MAX_JSON_CONTAINER_ITEMS + 1)
+
+    with pytest.raises(
+        SerializationError,
+        match="item count",
+    ):
+        to_json(value, indent=None)
+
+    payload = json.dumps(value)
+
+    with pytest.raises(
+        SerializationError,
+        match="item count",
+    ):
+        from_json(payload)
+
+
+def test_json_accepts_exact_string_character_limit() -> None:
+    value = "x" * MAX_JSON_STRING_CHARS
+    payload = to_json(value, indent=None)
+
+    assert from_json(payload) == value
+
+
+def test_json_rejects_string_above_character_limit() -> None:
+    value = "x" * (MAX_JSON_STRING_CHARS + 1)
+
+    with pytest.raises(
+        SerializationError,
+        match="JSON string",
+    ):
+        to_json(value, indent=None)
+
+    payload = json.dumps(value)
+
+    with pytest.raises(
+        SerializationError,
+        match="JSON string",
+    ):
+        from_json(payload)
+
+
+def test_json_accepts_exact_key_character_limit() -> None:
+    key = "k" * MAX_JSON_KEY_CHARS
+    value = {key: 1}
+    payload = to_json(value, indent=None)
+
+    assert from_json(payload) == value
+
+
+def test_json_rejects_key_above_character_limit() -> None:
+    key = "k" * (MAX_JSON_KEY_CHARS + 1)
+    value = {key: 1}
+
+    with pytest.raises(
+        SerializationError,
+        match="object key",
+    ):
+        to_json(value, indent=None)
+
+    payload = json.dumps(value)
+
+    with pytest.raises(
+        SerializationError,
+        match="object key",
+    ):
+        from_json(payload)
+
+
+def test_json_accepts_exact_total_node_limit() -> None:
+    value = _node_boundary_value()
+    payload = to_json(value, indent=None)
+    restored = from_json(payload)
+
+    assert isinstance(restored, list)
+    assert len(restored) == MAX_JSON_CONTAINER_ITEMS
+
+
+def test_json_rejects_total_nodes_above_limit() -> None:
+    value = _node_boundary_value(over_limit=True)
+
+    with pytest.raises(
+        SerializationError,
+        match="total node count",
+    ):
+        to_json(value, indent=None)
+
+    payload = json.dumps(value)
+
+    with pytest.raises(
+        SerializationError,
+        match="total node count",
+    ):
+        from_json(payload)
+
+
+def test_from_json_wraps_decoder_recursion_error() -> None:
+    payload = "[" * 2_000 + "0" + "]" * 2_000
+
+    with pytest.raises(SerializationError) as caught:
+        from_json(payload)
+
+    assert isinstance(caught.value.__cause__, RecursionError)
+
+
+def test_to_json_wraps_encoder_recursion_error() -> None:
+    value = _nested_array(2_000)
+
+    with pytest.raises(SerializationError) as caught:
+        to_json(value, indent=None)
+
+    assert isinstance(caught.value.__cause__, RecursionError)

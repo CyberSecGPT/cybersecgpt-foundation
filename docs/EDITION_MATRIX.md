@@ -21,7 +21,7 @@ and `Not available`.
 | Audit event contracts | Included | Included | Included |
 | Evidence reference contract | Included | Included | Included |
 | Structural validation helpers | Included | Included | Included |
-| Deterministic JSON helpers | Included | Included | Included |
+| Defensively bounded deterministic JSON helpers | Included | Included | Included |
 | Opt-in standard logging helpers | Included | Included | Included |
 | JSON-compatible typing aliases | Included | Included | Included |
 | Timezone-aware UTC helpers | Included | Included | Included |
