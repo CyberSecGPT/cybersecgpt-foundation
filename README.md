@@ -46,6 +46,7 @@ The current foundation API provides:
 
 - A shared exception hierarchy rooted at `FoundationError`.
 - Immutable typed identifiers with UUID4 generation.
+- Immutable `SecurityContext` for opaque actor and trace identity.
 - String and integer validation helpers.
 - Deterministic JSON serialization and deserialization.
 - Idempotent, opt-in logging configuration and validated logger lookup.

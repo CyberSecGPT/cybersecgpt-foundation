@@ -62,6 +62,7 @@ The package owns small, stable, cross-cutting Python primitives:
 - project constants and version metadata
 - a common exception hierarchy
 - immutable identifiers
+- immutable security-context contracts for opaque actor and trace identity
 - reusable validation helpers
 - deterministic JSON conversion
 - opt-in logging configuration

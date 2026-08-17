@@ -17,6 +17,7 @@ and `Not available`.
 | Shared project constants | Included | Included | Included |
 | Foundation exception hierarchy | Included | Included | Included |
 | Immutable typed identifiers | Included | Included | Included |
+| Security context contract | Included | Included | Included |
 | Structural validation helpers | Included | Included | Included |
 | Deterministic JSON helpers | Included | Included | Included |
 | Opt-in standard logging helpers | Included | Included | Included |

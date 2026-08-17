@@ -19,6 +19,7 @@ EXPECTED_FOUNDATION_EXPORTS = {
     "CorrelationId",
     "RequestId",
     "RunId",
+    "SecurityContext",
     "JsonArray",
     "JsonObject",
     "JsonScalar",
