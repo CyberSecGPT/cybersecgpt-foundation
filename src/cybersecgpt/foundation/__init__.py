@@ -16,7 +16,14 @@ from .exceptions import (
 )
 from .identifiers import CorrelationId, Identifier, RequestId, RunId
 from .logging import configure_logging, get_logger
-from .security import SecurityContext
+from .security import (
+    AuditEvent,
+    AuditEventId,
+    AuditMetadata,
+    AuditOutcome,
+    AuditSeverity,
+    SecurityContext,
+)
 from .serialization import from_json, to_json
 from .typing import JsonArray, JsonObject, JsonScalar, JsonValue
 from .utils import utc_now, utc_now_iso
@@ -43,6 +50,11 @@ __all__ = [
     "CorrelationId",
     "RequestId",
     "RunId",
+    "AuditEvent",
+    "AuditEventId",
+    "AuditMetadata",
+    "AuditOutcome",
+    "AuditSeverity",
     "SecurityContext",
     "JsonArray",
     "JsonObject",

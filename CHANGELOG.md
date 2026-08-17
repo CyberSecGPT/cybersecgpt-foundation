@@ -12,6 +12,9 @@ maintainer approval and must satisfy the repository quality gates.
   helpers, deterministic JSON serialization, logging helpers, JSON typing
   aliases, and UTC time utilities.
 - Immutable `SecurityContext` contract for opaque actor and trace identity.
+- Immutable audit-event contracts with typed identity, UTC timestamps,
+  severity and outcome enums, immutable JSON metadata, and deterministic
+  serialization/deserialization.
 - Unit tests with full statement and branch coverage.
 - Continuous integration across Python 3.11, 3.12, and 3.13.
 - Repository governance, security, contribution, and architecture

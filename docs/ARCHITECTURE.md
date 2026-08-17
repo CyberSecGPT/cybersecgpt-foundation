@@ -63,6 +63,7 @@ The package owns small, stable, cross-cutting Python primitives:
 - a common exception hierarchy
 - immutable identifiers
 - immutable security-context contracts for opaque actor and trace identity
+- immutable audit-event contracts for structured security-relevant records
 - reusable validation helpers
 - deterministic JSON conversion
 - opt-in logging configuration
@@ -86,6 +87,10 @@ src/cybersecgpt/
     ├── exceptions.py
     ├── identifiers.py
     ├── logging.py
+    ├── security/
+    │   ├── __init__.py
+    │   ├── audit.py
+    │   └── context.py
     ├── serialization.py
     ├── typing.py
     ├── utils.py
@@ -105,6 +110,8 @@ under `docs/`, and automation lives under `scripts/` and `.github/`.
 | `identifiers` | Immutable string identifiers and UUID4 generation |
 | `validation` | Shared structural string and integer validation |
 | `serialization` | Deterministic JSON encoding and decoding |
+| `security.context` | Immutable opaque actor and trace context |
+| `security.audit` | Immutable structured audit-event contracts |
 | `logging` | Explicit root configuration and validated logger lookup |
 | `typing` | Recursive JSON-compatible type aliases |
 | `utils` | Timezone-aware UTC values and ISO 8601 text |
@@ -121,9 +128,11 @@ flow toward shared validation and errors:
 
 ```text
 identifiers ──────→ exceptions
-validation ───────→ exceptions
+validation ──────→ exceptions
 serialization ────→ constants, exceptions, validation
-logging ──────────→ validation
+security.context ─→ identifiers, validation
+security.audit ───→ identifiers, serialization, typing, utils, validation, security.context
+logging ─────────→ validation
 ```
 
 The package initializers re-export public objects but contain no application
@@ -143,6 +152,17 @@ original cause.
 
 Logging configuration is opt-in. It configures the root logger only when no
 handlers exist, preserving application ownership of logging destinations.
+
+`SecurityContext` carries structural actor and trace identity only. It does
+not contain authentication state, credentials, roles, permissions,
+entitlements, or authorization decisions.
+
+`AuditEvent` records a security-relevant outcome supplied by a higher layer.
+The `DENIED` value is a recorded outcome only; Foundation does not decide
+whether an operation is authorized. Audit metadata is defensively immutable
+and canonicalized through the shared deterministic JSON serializer. Metadata
+is not automatically redacted, so callers remain responsible for excluding
+credentials, secrets, tokens, and inappropriate sensitive data.
 
 ## Dependencies and portability
 

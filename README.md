@@ -47,6 +47,7 @@ The current foundation API provides:
 - A shared exception hierarchy rooted at `FoundationError`.
 - Immutable typed identifiers with UUID4 generation.
 - Immutable `SecurityContext` for opaque actor and trace identity.
+- Immutable audit-event contracts for structured security-relevant records.
 - String and integer validation helpers.
 - Deterministic JSON serialization and deserialization.
 - Idempotent, opt-in logging configuration and validated logger lookup.
@@ -160,6 +161,10 @@ src/
         ├── exceptions.py
         ├── identifiers.py
         ├── logging.py
+        ├── security/
+        │   ├── __init__.py
+        │   ├── audit.py
+        │   └── context.py
         ├── serialization.py
         ├── typing.py
         ├── utils.py
@@ -170,10 +175,14 @@ tests/
 ├── test_exceptions.py
 ├── test_identifiers.py
 ├── test_logging.py
+├── test_repository_policy.py
+├── test_security_audit.py
+├── test_security_context.py
 ├── test_serialization.py
 ├── test_typing.py
 ├── test_utils.py
 ├── test_validation.py
+├── test_verify_distribution.py
 └── test_version.py
 ```
 
