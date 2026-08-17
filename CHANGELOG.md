@@ -24,3 +24,14 @@ maintainer approval and must satisfy the repository quality gates.
 
 - Updated repository licensing metadata for the planned CyberSecGPT Community
   Source License (CSL) Version 1.0.
+- Export JSON-compatible typing aliases from the public `cybersecgpt.foundation`
+  API to match documented edition availability.
+- Bound development and build dependency versions for more stable CI
+  resolution.
+- Accept PEP-compliant Core Metadata versions 2.4 and newer within major
+  version 2 during distribution verification.
+
+### Fixed
+
+- Distribution verification no longer rejects valid `Metadata-Version: 2.5`
+  wheel and source-archive metadata emitted by current Hatchling releases.

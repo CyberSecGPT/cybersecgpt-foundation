@@ -17,6 +17,7 @@ from .exceptions import (
 from .identifiers import CorrelationId, Identifier, RequestId, RunId
 from .logging import configure_logging, get_logger
 from .serialization import from_json, to_json
+from .typing import JsonArray, JsonObject, JsonScalar, JsonValue
 from .utils import utc_now, utc_now_iso
 from .validation import (
     require_non_empty_string,
@@ -41,6 +42,10 @@ __all__ = [
     "CorrelationId",
     "RequestId",
     "RunId",
+    "JsonArray",
+    "JsonObject",
+    "JsonScalar",
+    "JsonValue",
     "require_non_empty_string",
     "require_non_negative_integer",
     "require_positive_integer",
