@@ -46,14 +46,40 @@ The current foundation API provides:
 
 - A shared exception hierarchy rooted at `FoundationError`.
 - Immutable typed identifiers with UUID4 generation.
+- Immutable `SecurityContext` for opaque actor and trace identity.
+- Immutable audit-event contracts for structured security-relevant records.
+- Immutable `EvidenceRef` contracts for evidence provenance and integrity
+  references without retrieval or verification behavior.
 - String and integer validation helpers.
-- Deterministic JSON serialization and deserialization.
+- Immutable configuration mapping with strict typed accessors and canonical
+  environment-variable naming without automatic environment loading.
+- Deterministic JSON serialization and deserialization with defensive
+  payload and structural bounds.
 - Idempotent, opt-in logging configuration and validated logger lookup.
 - Timezone-aware UTC datetime and ISO 8601 helpers.
 - Stable project constants and recursive JSON-compatible typing aliases.
 
 These primitives use only the Python standard library and remain intentionally
 independent of application frameworks and other CyberSecGPT repositories.
+
+## JSON safety bounds
+
+Foundation JSON helpers enforce fixed defensive ceilings:
+
+| Constant | Limit |
+| --- | ---: |
+| `MAX_JSON_PAYLOAD_CHARS` | 1,048,576 characters |
+| `MAX_JSON_DEPTH` | 64 container levels |
+| `MAX_JSON_CONTAINER_ITEMS` | 10,000 items per object or array |
+| `MAX_JSON_TOTAL_NODES` | 100,000 JSON value nodes |
+| `MAX_JSON_STRING_CHARS` | 262,144 characters per string value |
+| `MAX_JSON_KEY_CHARS` | 4,096 characters per object key |
+
+Payload size is measured in Python string characters rather than encoded
+bytes. Container depth counts nested JSON objects and arrays; object keys are
+bounded separately from JSON value-node counting. These limits are shared
+Foundation safety ceilings, not licensing, entitlement, subscription, or
+edition-specific limits.
 
 ## Edition positioning
 
@@ -156,9 +182,15 @@ src/
     └── foundation/
         ├── __init__.py
         ├── constants.py
+        ├── configuration.py
         ├── exceptions.py
         ├── identifiers.py
         ├── logging.py
+        ├── security/
+        │   ├── __init__.py
+        │   ├── audit.py
+        │   ├── context.py
+        │   └── evidence.py
         ├── serialization.py
         ├── typing.py
         ├── utils.py
@@ -166,13 +198,19 @@ src/
         └── version.py
 tests/
 ├── test_constants.py
+├── test_configuration.py
 ├── test_exceptions.py
 ├── test_identifiers.py
 ├── test_logging.py
+├── test_repository_policy.py
+├── test_security_audit.py
+├── test_security_context.py
+├── test_security_evidence.py
 ├── test_serialization.py
 ├── test_typing.py
 ├── test_utils.py
 ├── test_validation.py
+├── test_verify_distribution.py
 └── test_version.py
 ```
 

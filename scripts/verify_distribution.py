@@ -5,8 +5,10 @@ import base64
 import csv
 import hashlib
 import io
+import re
 import stat
 import tarfile
+import warnings
 import zipfile
 from email.message import Message
 from email.parser import Parser
@@ -29,6 +31,10 @@ EXPECTED_SDIST_FILENAME = f"{EXPECTED_SDIST_ROOT}.tar.gz"
 EXPECTED_DIST_INFO = f"{EXPECTED_NORMALIZED_NAME}-{EXPECTED_VERSION}.dist-info"
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 
+_MIN_METADATA_VERSION = (2, 4)
+_HIGHEST_KNOWN_METADATA_VERSION = (2, 5)
+_SUPPORTED_METADATA_MAJOR = 2
+
 EXPECTED_CLASSIFIERS = frozenset(
     {
         "Development Status :: 3 - Alpha",
@@ -39,26 +45,32 @@ EXPECTED_CLASSIFIERS = frozenset(
     }
 )
 
-EXPECTED_DEV_REQUIREMENTS = frozenset(
+EXPECTED_DEV_PACKAGES = frozenset(
     {
-        "black; extra == 'dev'",
-        "build; extra == 'dev'",
-        "mypy; extra == 'dev'",
-        "pytest; extra == 'dev'",
-        "pytest-cov; extra == 'dev'",
-        "ruff; extra == 'dev'",
+        "black",
+        "build",
+        "mypy",
+        "pytest",
+        "pytest-cov",
+        "ruff",
     }
 )
+_VERSION_SPECIFIER_START = frozenset("<>=!")
 
 EXPECTED_PACKAGE_FILES = frozenset(
     {
         "cybersecgpt/__init__.py",
         "cybersecgpt/foundation/__init__.py",
         "cybersecgpt/foundation/constants.py",
+        "cybersecgpt/foundation/configuration.py",
         "cybersecgpt/foundation/exceptions.py",
         "cybersecgpt/foundation/identifiers.py",
         "cybersecgpt/foundation/logging.py",
         "cybersecgpt/foundation/serialization.py",
+        "cybersecgpt/foundation/security/__init__.py",
+        "cybersecgpt/foundation/security/audit.py",
+        "cybersecgpt/foundation/security/context.py",
+        "cybersecgpt/foundation/security/evidence.py",
         "cybersecgpt/foundation/typing.py",
         "cybersecgpt/foundation/utils.py",
         "cybersecgpt/foundation/validation.py",
@@ -70,14 +82,19 @@ EXPECTED_TEST_FILES = frozenset(
     {
         "tests/__init__.py",
         "tests/test_constants.py",
+        "tests/test_configuration.py",
         "tests/test_exceptions.py",
         "tests/test_identifiers.py",
         "tests/test_logging.py",
         "tests/test_repository_policy.py",
+        "tests/test_security_audit.py",
+        "tests/test_security_context.py",
+        "tests/test_security_evidence.py",
         "tests/test_serialization.py",
         "tests/test_typing.py",
         "tests/test_utils.py",
         "tests/test_validation.py",
+        "tests/test_verify_distribution.py",
         "tests/test_version.py",
     }
 )
@@ -152,11 +169,157 @@ def _parse_metadata(content: bytes, source: str) -> Message:
     return Parser().parsestr(text)
 
 
+def _parse_metadata_version(value: str) -> tuple[int, int]:
+    """Parse a Core Metadata version string into ``(major, minor)``."""
+    parts = value.split(".")
+    if len(parts) != 2:
+        raise DistributionVerificationError(f"malformed Metadata-Version: {value!r}")
+    try:
+        major = int(parts[0])
+        minor = int(parts[1])
+    except ValueError as error:
+        raise DistributionVerificationError(
+            f"malformed Metadata-Version: {value!r}"
+        ) from error
+    return major, minor
+
+
+def _verify_metadata_version(metadata: Message, source: str) -> None:
+    """Verify Core Metadata version compatibility for this project."""
+    values = _header_values(metadata, "Metadata-Version")
+    _require(
+        len(values) == 1,
+        f"{source} Metadata-Version must occur once, found {len(values)}",
+    )
+    version_text = values[0]
+    major, minor = _parse_metadata_version(version_text)
+    parsed = (major, minor)
+    _require(
+        major <= _SUPPORTED_METADATA_MAJOR,
+        f"{source} unsupported Metadata-Version major: {version_text}",
+    )
+    _require(
+        parsed >= _MIN_METADATA_VERSION,
+        f"{source} Metadata-Version must be at least "
+        f"{_MIN_METADATA_VERSION[0]}.{_MIN_METADATA_VERSION[1]}, "
+        f"found {version_text}",
+    )
+    if parsed > _HIGHEST_KNOWN_METADATA_VERSION:
+        warnings.warn(
+            f"{source} Metadata-Version {version_text} is newer than the highest "
+            f"known version {_HIGHEST_KNOWN_METADATA_VERSION[0]}."
+            f"{_HIGHEST_KNOWN_METADATA_VERSION[1]}; verification accepted "
+            "under PEP core-metadata major-version rules",
+            stacklevel=2,
+        )
+
+
+def _is_dev_extra_marker(marker: str) -> bool:
+    """Return whether a Requires-Dist marker targets the dev extra."""
+    return marker.replace('"', "'") == "extra == 'dev'"
+
+
+def _dev_package_name(specification: str) -> str | None:
+    """Extract a known dev package name from a constrained Requires-Dist spec."""
+    for package in EXPECTED_DEV_PACKAGES:
+        if specification == package:
+            return package
+        if not specification.startswith(package):
+            continue
+        if len(specification) == len(package):
+            return package
+        next_character = specification[len(package)]
+        if next_character in _VERSION_SPECIFIER_START:
+            return package
+    return None
+
+
+def _parse_dev_requires_dist(requirement: str) -> str | None:
+    """Extract the package name from this project's dev-extra metadata."""
+    requirement_part, separator, marker = requirement.partition(";")
+
+    if not separator:
+        return None
+
+    normalized_marker = marker.replace('"', "'").replace(" ", "")
+
+    if normalized_marker != "extra=='dev'":
+        return None
+
+    requirement_part = requirement_part.strip()
+
+    _require(
+        bool(requirement_part),
+        f"invalid dev Requires-Dist entry: {requirement!r}",
+    )
+
+    operator_positions = [
+        requirement_part.find(character)
+        for character in "<>!=~"
+        if requirement_part.find(character) >= 0
+    ]
+
+    if operator_positions:
+        package_name = requirement_part[: min(operator_positions)].strip()
+    else:
+        package_name = requirement_part
+
+    _require(
+        bool(package_name),
+        f"missing package name in Requires-Dist entry: {requirement!r}",
+    )
+
+    _require(
+        all(character.isalnum() or character in "-_." for character in package_name),
+        f"invalid package name in Requires-Dist entry: {requirement!r}",
+    )
+
+    return re.sub(r"[-_.]+", "-", package_name).lower()
+
+
+def _verify_dev_requirements(requirements: list[str], source: str) -> None:
+    """Verify that the dev extra contains exactly the expected packages."""
+    dev_packages: list[str] = []
+
+    for requirement in requirements:
+        package_name = _parse_dev_requires_dist(requirement)
+
+        if package_name is not None:
+            dev_packages.append(package_name)
+
+    duplicates = sorted(
+        {package for package in dev_packages if dev_packages.count(package) > 1}
+    )
+
+    _require(
+        not duplicates,
+        f"{source} dev dependencies contain duplicates: {duplicates}",
+    )
+
+    actual_packages = set(dev_packages)
+
+    missing = sorted(EXPECTED_DEV_PACKAGES - actual_packages)
+    unexpected = sorted(actual_packages - EXPECTED_DEV_PACKAGES)
+
+    _require(
+        not missing and not unexpected,
+        (
+            f"{source} dev dependency set is incorrect: "
+            f"missing={missing}, unexpected={unexpected}"
+        ),
+    )
+
+    _require(
+        len(dev_packages) == len(EXPECTED_DEV_PACKAGES),
+        (f"{source} dev dependency count is incorrect: " f"{dev_packages}"),
+    )
+
+
 def _verify_project_metadata(content: bytes, source: str) -> None:
     """Verify core, dependency, Python, and license metadata."""
     metadata = _parse_metadata(content, source)
+    _verify_metadata_version(metadata, source)
     expected_headers = {
-        "Metadata-Version": "2.4",
         "Name": EXPECTED_NAME,
         "Version": EXPECTED_VERSION,
         "Summary": EXPECTED_SUMMARY,
@@ -187,10 +350,10 @@ def _verify_project_metadata(content: bytes, source: str) -> None:
 
     requirements = _header_values(metadata, "Requires-Dist")
     _require(
-        len(requirements) == len(EXPECTED_DEV_REQUIREMENTS)
-        and set(requirements) == EXPECTED_DEV_REQUIREMENTS,
-        f"{source} dependency metadata is incorrect: {requirements}",
+        len(requirements) == len(EXPECTED_DEV_PACKAGES),
+        f"{source} dependency metadata count is incorrect: {requirements}",
     )
+    _verify_dev_requirements(requirements, source)
 
 
 def _verify_archive_names(names: list[str], source: str) -> None:

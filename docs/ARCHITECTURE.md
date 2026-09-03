@@ -62,8 +62,13 @@ The package owns small, stable, cross-cutting Python primitives:
 - project constants and version metadata
 - a common exception hierarchy
 - immutable identifiers
+- immutable security-context contracts for opaque actor and trace identity
+- immutable audit-event contracts for structured security-relevant records
+- immutable evidence-reference contracts for opaque evidence provenance and
+  integrity references
+- immutable configuration mappings with strict typed accessors
 - reusable validation helpers
-- deterministic JSON conversion
+- deterministic and defensively bounded JSON conversion
 - opt-in logging configuration
 - JSON-compatible typing aliases
 - timezone-aware UTC helpers
@@ -82,9 +87,15 @@ src/cybersecgpt/
 └── foundation/
     ├── __init__.py
     ├── constants.py
+    ├── configuration.py
     ├── exceptions.py
     ├── identifiers.py
     ├── logging.py
+    ├── security/
+    │   ├── __init__.py
+    │   ├── audit.py
+    │   ├── context.py
+    │   └── evidence.py
     ├── serialization.py
     ├── typing.py
     ├── utils.py
@@ -99,11 +110,15 @@ under `docs/`, and automation lives under `scripts/` and `.github/`.
 
 | Module | Responsibility |
 | --- | --- |
-| `constants` | Stable project and serialization defaults |
+| `constants` | Stable project, serialization defaults, and JSON safety ceilings |
+| `configuration` | Immutable configuration mapping and strict typed accessors |
 | `exceptions` | Domain-specific foundation error hierarchy |
 | `identifiers` | Immutable string identifiers and UUID4 generation |
 | `validation` | Shared structural string and integer validation |
-| `serialization` | Deterministic JSON encoding and decoding |
+| `serialization` | Deterministic and defensively bounded JSON encoding and decoding |
+| `security.context` | Immutable opaque actor and trace context |
+| `security.audit` | Immutable structured audit-event contracts |
+| `security.evidence` | Immutable evidence provenance and integrity references |
 | `logging` | Explicit root configuration and validated logger lookup |
 | `typing` | Recursive JSON-compatible type aliases |
 | `utils` | Timezone-aware UTC values and ISO 8601 text |
@@ -121,7 +136,11 @@ flow toward shared validation and errors:
 ```text
 identifiers ──────→ exceptions
 validation ───────→ exceptions
+configuration ────→ constants, exceptions
 serialization ────→ constants, exceptions, validation
+security.context ─→ identifiers, validation
+security.audit ───→ identifiers, serialization, typing, utils, validation, security.context
+security.evidence ─→ serialization, typing, validation
 logging ──────────→ validation
 ```
 
@@ -136,12 +155,42 @@ values are not required to use UUID syntax; UUID4 is used only by `new()`.
 Validation helpers return accepted values unchanged and raise
 `ValidationError` with field-specific messages.
 
+`Configuration` stores a defensive immutable copy of canonical lower-snake-
+case keys and opaque string values. Foundation does not automatically read
+process environment variables, `.env` files, YAML, TOML, secret stores, or
+credential providers. Boolean access accepts only `true` and `false`, and
+integer access accepts strict base-10 text. Environment-variable names are
+derived from the shared `CYBERSECGPT_` prefix without reading or modifying
+the process environment. Configuration does not implement licensing,
+entitlements, feature gating, authorization, or secret management.
+
 JSON serialization sorts mapping keys, preserves Unicode, and converts
 standard-library codec failures into `SerializationError` while retaining the
-original cause.
+original cause. Encoding and decoding enforce package-wide safety ceilings of
+1,048,576 payload characters, 64 nested container levels, 10,000 items per
+container, 100,000 total JSON value nodes, 262,144 characters per string
+value, and 4,096 characters per object key. Payload size is measured in Python
+string characters rather than encoded bytes. These are Foundation safety
+ceilings, not edition, entitlement, subscription, or licensing limits.
 
 Logging configuration is opt-in. It configures the root logger only when no
 handlers exist, preserving application ownership of logging destinations.
+
+`SecurityContext` carries structural actor and trace identity only. It does
+not contain authentication state, credentials, roles, permissions,
+entitlements, or authorization decisions.
+
+`AuditEvent` records a security-relevant outcome supplied by a higher layer.
+The `DENIED` value is a recorded outcome only; Foundation does not decide
+whether an operation is authorized. Audit metadata is defensively immutable
+and canonicalized through the shared deterministic JSON serializer. Metadata
+is not automatically redacted, so callers remain responsible for excluding
+credentials, secrets, tokens, and inappropriate sensitive data.
+
+`EvidenceRef` describes an evidence source, opaque locator, digest algorithm,
+digest value, and optional media type. Foundation does not retrieve evidence,
+read files, access storage, fetch URLs, compute hashes, validate digest
+algorithms, or verify that referenced evidence matches a supplied digest.
 
 ## Dependencies and portability
 
