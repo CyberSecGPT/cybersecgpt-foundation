@@ -9,7 +9,10 @@ architectural changes are governed through `cybersecgpt-docs`.
 
 Changes that alter a public contract, layer boundary, or dependency direction
 require architectural review and an Architecture Decision Record through the
-governed documentation process.
+governed documentation process. Native Brain contracts in this repository follow
+Accepted ADR-0011 and remain limited to stable cross-domain primitives; routing,
+policy evaluation, authorization decisions, model execution, and reasoning
+algorithms remain owned by their designated repositories.
 
 ## Role in the platform
 
@@ -61,8 +64,12 @@ The package owns small, stable, cross-cutting Python primitives:
 
 - project constants and version metadata
 - a common exception hierarchy
-- immutable identifiers
+- immutable identifiers, including P5 identifiers for authorization contexts,
+  capability snapshots, routing decisions, security-policy revisions, and
+  intelligence substrates
 - immutable security-context contracts for opaque actor and trace identity
+- immutable P5 routing-security bindings that carry exact request/security state
+  without granting authorization or evaluating policy
 - immutable audit-event contracts for structured security-relevant records
 - immutable evidence-reference contracts for opaque evidence provenance and
   integrity references
@@ -73,7 +80,8 @@ The package owns small, stable, cross-cutting Python primitives:
 - JSON-compatible typing aliases
 - timezone-aware UTC helpers
 
-Application behavior, cybersecurity product logic, model workflows,
+Application behavior, cybersecurity product logic, routing algorithms,
+authorization decisions, security-policy evaluation, model workflows,
 persistence, network services, user interfaces, deployment, and infrastructure
 remain outside this repository.
 
@@ -113,10 +121,10 @@ under `docs/`, and automation lives under `scripts/` and `.github/`.
 | `constants` | Stable project, serialization defaults, and JSON safety ceilings |
 | `configuration` | Immutable configuration mapping and strict typed accessors |
 | `exceptions` | Domain-specific foundation error hierarchy |
-| `identifiers` | Immutable string identifiers and UUID4 generation |
+| `identifiers` | Immutable string identifiers, including P5 security/routing/substrate identities, and UUID4 generation |
 | `validation` | Shared structural string and integer validation |
 | `serialization` | Deterministic and defensively bounded JSON encoding and decoding |
-| `security.context` | Immutable opaque actor and trace context |
+| `security.context` | Immutable opaque actor/trace context and non-authorizing P5 routing-security bindings |
 | `security.audit` | Immutable structured audit-event contracts |
 | `security.evidence` | Immutable evidence provenance and integrity references |
 | `logging` | Explicit root configuration and validated logger lookup |
@@ -151,6 +159,10 @@ logic. Imports do not configure logging or perform external I/O.
 
 Identifiers validate only structural string constraints. Manually supplied
 values are not required to use UUID syntax; UUID4 is used only by `new()`.
+P5 identifier types provide type separation across request, authorization-context,
+capability-snapshot, routing-decision, security-policy-revision, and substrate
+references. They do not prove authenticity, current validity, authorization, or
+artifact integrity.
 
 Validation helpers return accepted values unchanged and raise
 `ValidationError` with field-specific messages.
@@ -179,6 +191,16 @@ handlers exist, preserving application ownership of logging destinations.
 `SecurityContext` carries structural actor and trace identity only. It does
 not contain authentication state, credentials, roles, permissions,
 entitlements, or authorization decisions.
+
+`RoutingSecurityBinding` is the first executable P5 Native Brain contract in
+Foundation. It binds a request to typed authorization-context,
+security-policy-revision, and capability-snapshot identifiers together with an
+opaque effective data classification, provider/network policy, and explicit
+offline requirement. The binding is immutable but is not an allow decision. A
+router, model, memory component, retrieval component, fallback path, or tool must
+not treat it as permission. Authoritative policy/authorization owners and the
+side-effect boundary remain responsible for current-state validation and for
+rejecting stale, revoked, mismatched, or otherwise invalid bindings.
 
 `AuditEvent` records a security-relevant outcome supplied by a higher layer.
 The `DENIED` value is a recorded outcome only; Foundation does not decide
