@@ -149,10 +149,22 @@ def test_routing_security_binding_is_immutable() -> None:
     ("field_name", "invalid_value", "message"),
     [
         ("request_id", "request-123", "request_id"),
-        ("authorization_context_id", "authorization-123", "authorization_context_id"),
-        ("security_policy_revision_id", "policy-7", "security_policy_revision_id"),
+        (
+            "authorization_context_id",
+            "authorization-123",
+            "authorization_context_id",
+        ),
+        (
+            "security_policy_revision_id",
+            "policy-7",
+            "security_policy_revision_id",
+        ),
         ("effective_data_classification", "", "effective_data_classification"),
-        ("effective_data_classification", " restricted", "effective_data_classification"),
+        (
+            "effective_data_classification",
+            " restricted",
+            "effective_data_classification",
+        ),
         ("provider_network_policy", "", "provider_network_policy"),
         ("provider_network_policy", "native-only ", "provider_network_policy"),
         ("offline_required", 1, "offline_required"),
