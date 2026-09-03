@@ -7,7 +7,7 @@ from .audit import (
     AuditOutcome,
     AuditSeverity,
 )
-from .context import SecurityContext
+from .context import RoutingSecurityBinding, SecurityContext
 from .evidence import EvidenceRef
 
 __all__ = [
@@ -17,5 +17,6 @@ __all__ = [
     "AuditOutcome",
     "AuditSeverity",
     "EvidenceRef",
+    "RoutingSecurityBinding",
     "SecurityContext",
 ]
