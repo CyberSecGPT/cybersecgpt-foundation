@@ -301,19 +301,29 @@ def test_json_rejects_total_nodes_above_limit() -> None:
         from_json(payload)
 
 
-def test_from_json_wraps_decoder_recursion_error() -> None:
-    payload = "[" * 2_000 + "0" + "]" * 2_000
+def test_from_json_wraps_decoder_recursion_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def raise_recursion(_payload: str) -> object:
+        raise RecursionError("decoder recursion")
+
+    monkeypatch.setattr(json, "loads", raise_recursion)
 
     with pytest.raises(SerializationError) as caught:
-        from_json(payload)
+        from_json("0")
 
     assert isinstance(caught.value.__cause__, RecursionError)
 
 
-def test_to_json_wraps_encoder_recursion_error() -> None:
-    value = _nested_array(2_000)
+def test_to_json_wraps_encoder_recursion_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def raise_recursion(*_args: object, **_kwargs: object) -> str:
+        raise RecursionError("encoder recursion")
+
+    monkeypatch.setattr(json, "dumps", raise_recursion)
 
     with pytest.raises(SerializationError) as caught:
-        to_json(value, indent=None)
+        to_json(0, indent=None)
 
     assert isinstance(caught.value.__cause__, RecursionError)
