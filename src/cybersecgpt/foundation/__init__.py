@@ -36,13 +36,6 @@ from .identifiers import (
     SubstrateId,
 )
 from .logging import configure_logging, get_logger
-from .native_brain import (
-    AvailabilityState,
-    RoutingSecurityBinding,
-    SubstrateDescriptor,
-    SubstrateKind,
-    VerificationStatus,
-)
 from .security import (
     AuditEvent,
     AuditEventId,
@@ -50,6 +43,7 @@ from .security import (
     AuditOutcome,
     AuditSeverity,
     EvidenceRef,
+    RoutingSecurityBinding,
     SecurityContext,
 )
 from .serialization import from_json, to_json
@@ -91,17 +85,13 @@ __all__ = [
     "RunId",
     "SecurityPolicyRevisionId",
     "SubstrateId",
-    "AvailabilityState",
-    "RoutingSecurityBinding",
-    "SubstrateDescriptor",
-    "SubstrateKind",
-    "VerificationStatus",
     "AuditEvent",
     "AuditEventId",
     "AuditMetadata",
     "AuditOutcome",
     "AuditSeverity",
     "EvidenceRef",
+    "RoutingSecurityBinding",
     "SecurityContext",
     "JsonArray",
     "JsonObject",
