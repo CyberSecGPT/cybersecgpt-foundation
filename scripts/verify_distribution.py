@@ -60,6 +60,7 @@ _VERSION_SPECIFIER_START = frozenset("<>=!")
 EXPECTED_PACKAGE_FILES = frozenset(
     {
         "cybersecgpt/__init__.py",
+        "cybersecgpt/py.typed",
         "cybersecgpt/foundation/__init__.py",
         "cybersecgpt/foundation/constants.py",
         "cybersecgpt/foundation/configuration.py",

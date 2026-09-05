@@ -11,6 +11,9 @@ maintainer approval and must satisfy the repository quality gates.
 - Shared constants, exception hierarchy, typed identifiers, validation
   helpers, deterministic JSON serialization, logging helpers, JSON typing
   aliases, and UTC time utilities.
+- PEP 561 `py.typed` package marker so downstream strict type checkers consume
+  Foundation's inline type annotations instead of treating the package as
+  untyped.
 - Immutable `SecurityContext` contract for opaque actor and trace identity.
 - P5 Native Brain typed identifiers for authorization contexts, capability
   snapshots, routing decisions, security-policy revisions, and substrates.
