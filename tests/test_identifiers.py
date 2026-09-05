@@ -6,8 +6,8 @@ from uuid import UUID
 
 import pytest
 
-from cybersecgpt.foundation.exceptions import IdentifierError
 import cybersecgpt.foundation.identifiers as identifiers_module
+from cybersecgpt.foundation.exceptions import IdentifierError
 from cybersecgpt.foundation.identifiers import (
     AuthorizationContextId,
     CapabilitySnapshotId,
