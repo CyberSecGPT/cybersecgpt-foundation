@@ -20,7 +20,6 @@ from cybersecgpt.foundation.identifiers import (
     SubstrateId,
 )
 
-
 IDENTIFIER_TYPES = [
     Identifier,
     AuthorizationContextId,
