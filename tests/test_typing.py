@@ -1,4 +1,6 @@
-"""Tests for JSON-compatible typing aliases."""
+"""Tests for JSON-compatible typing aliases and PEP 561 metadata."""
+
+from importlib.resources import files
 
 import cybersecgpt.foundation as foundation
 import cybersecgpt.foundation.typing as foundation_typing
@@ -32,3 +34,10 @@ def test_foundation_reexports_json_typing_aliases() -> None:
     assert foundation.JsonValue is foundation_typing.JsonValue
     assert foundation.JsonObject is foundation_typing.JsonObject
     assert foundation.JsonArray is foundation_typing.JsonArray
+
+
+def test_pep561_marker_is_packaged() -> None:
+    """Expose inline type information to downstream PEP 561-aware checkers."""
+    marker = files("cybersecgpt").joinpath("py.typed")
+
+    assert marker.is_file()
