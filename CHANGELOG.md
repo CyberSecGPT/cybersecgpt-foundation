@@ -45,6 +45,9 @@ maintainer approval and must satisfy the repository quality gates.
   Source License (CSL) Version 1.0.
 - Export JSON-compatible typing aliases from the public `cybersecgpt.foundation`
   API to match documented edition availability.
+- Extend the top-level `cybersecgpt` package search path so separately
+  distributed platform packages such as `cybersecgpt.reasoning` remain
+  importable without duplicating Foundation-owned package initialization.
 - JSON serialization and deserialization now enforce package-wide defensive
   payload and structural safety ceilings.
 - Bound development and build dependency versions for more stable CI
