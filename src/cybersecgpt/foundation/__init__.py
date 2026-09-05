@@ -24,7 +24,17 @@ from .exceptions import (
     SerializationError,
     ValidationError,
 )
-from .identifiers import CorrelationId, Identifier, RequestId, RunId
+from .identifiers import (
+    AuthorizationContextId,
+    CapabilitySnapshotId,
+    CorrelationId,
+    Identifier,
+    RequestId,
+    RoutingDecisionId,
+    RunId,
+    SecurityPolicyRevisionId,
+    SubstrateId,
+)
 from .logging import configure_logging, get_logger
 from .security import (
     AuditEvent,
@@ -33,6 +43,7 @@ from .security import (
     AuditOutcome,
     AuditSeverity,
     EvidenceRef,
+    RoutingSecurityBinding,
     SecurityContext,
 )
 from .serialization import from_json, to_json
@@ -66,15 +77,21 @@ __all__ = [
     "SerializationError",
     "IdentifierError",
     "Identifier",
+    "AuthorizationContextId",
+    "CapabilitySnapshotId",
     "CorrelationId",
     "RequestId",
+    "RoutingDecisionId",
     "RunId",
+    "SecurityPolicyRevisionId",
+    "SubstrateId",
     "AuditEvent",
     "AuditEventId",
     "AuditMetadata",
     "AuditOutcome",
     "AuditSeverity",
     "EvidenceRef",
+    "RoutingSecurityBinding",
     "SecurityContext",
     "JsonArray",
     "JsonObject",

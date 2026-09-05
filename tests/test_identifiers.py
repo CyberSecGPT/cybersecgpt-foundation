@@ -9,20 +9,42 @@ import pytest
 import cybersecgpt.foundation.identifiers as identifiers_module
 from cybersecgpt.foundation.exceptions import IdentifierError
 from cybersecgpt.foundation.identifiers import (
+    AuthorizationContextId,
+    CapabilitySnapshotId,
     CorrelationId,
     Identifier,
     RequestId,
+    RoutingDecisionId,
     RunId,
+    SecurityPolicyRevisionId,
+    SubstrateId,
 )
+
+IDENTIFIER_TYPES = [
+    Identifier,
+    AuthorizationContextId,
+    CapabilitySnapshotId,
+    CorrelationId,
+    RequestId,
+    RoutingDecisionId,
+    RunId,
+    SecurityPolicyRevisionId,
+    SubstrateId,
+]
 
 
 @pytest.mark.parametrize(
     ("identifier_type", "value"),
     [
         (Identifier, "plain"),
+        (AuthorizationContextId, "authorization-context:7"),
+        (CapabilitySnapshotId, "capability-snapshot/4"),
         (CorrelationId, "correlation:external-format"),
         (RequestId, "request/123"),
+        (RoutingDecisionId, "routing-decision:9"),
         (RunId, "not-a-uuid"),
+        (SecurityPolicyRevisionId, "security-policy:v12"),
+        (SubstrateId, "substrate/native-general"),
     ],
 )
 def test_identifier_accepts_structurally_valid_values(
@@ -37,10 +59,7 @@ def test_identifier_accepts_structurally_valid_values(
 
 
 @pytest.mark.parametrize("value", ["", " ", "\t", "\n", " leading", "trailing "])
-@pytest.mark.parametrize(
-    "identifier_type",
-    [Identifier, CorrelationId, RequestId, RunId],
-)
+@pytest.mark.parametrize("identifier_type", IDENTIFIER_TYPES)
 def test_identifier_rejects_structurally_invalid_values(
     identifier_type: type[Identifier],
     value: str,
@@ -56,10 +75,7 @@ def test_identifier_rejects_non_string_values_at_runtime() -> None:
         Identifier(cast(str, 42))
 
 
-@pytest.mark.parametrize(
-    "identifier_type",
-    [Identifier, CorrelationId, RequestId, RunId],
-)
+@pytest.mark.parametrize("identifier_type", IDENTIFIER_TYPES)
 def test_new_creates_uuid4_identifier_of_requested_type(
     identifier_type: type[Identifier],
     monkeypatch: pytest.MonkeyPatch,
@@ -107,8 +123,13 @@ def test_identifier_exports_are_explicit() -> None:
     from cybersecgpt.foundation import identifiers
 
     assert identifiers.__all__ == [
+        "AuthorizationContextId",
+        "CapabilitySnapshotId",
         "CorrelationId",
         "Identifier",
         "RequestId",
+        "RoutingDecisionId",
         "RunId",
+        "SecurityPolicyRevisionId",
+        "SubstrateId",
     ]

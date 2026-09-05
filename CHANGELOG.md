@@ -12,6 +12,12 @@ maintainer approval and must satisfy the repository quality gates.
   helpers, deterministic JSON serialization, logging helpers, JSON typing
   aliases, and UTC time utilities.
 - Immutable `SecurityContext` contract for opaque actor and trace identity.
+- P5 Native Brain typed identifiers for authorization contexts, capability
+  snapshots, routing decisions, security-policy revisions, and substrates.
+- Immutable P5 `RoutingSecurityBinding` that binds request identity,
+  authorization-context identity, security-policy revision, effective data
+  classification, provider/network policy, offline requirement, and capability
+  snapshot without granting authorization or evaluating policy.
 - Immutable audit-event contracts with typed identity, UTC timestamps,
   severity and outcome enums, immutable JSON metadata, and deterministic
   serialization/deserialization.

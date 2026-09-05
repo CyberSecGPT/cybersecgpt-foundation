@@ -6,7 +6,17 @@ from uuid import uuid4
 
 from .exceptions import IdentifierError
 
-__all__ = ["CorrelationId", "Identifier", "RequestId", "RunId"]
+__all__ = [
+    "AuthorizationContextId",
+    "CapabilitySnapshotId",
+    "CorrelationId",
+    "Identifier",
+    "RequestId",
+    "RoutingDecisionId",
+    "RunId",
+    "SecurityPolicyRevisionId",
+    "SubstrateId",
+]
 
 
 @dataclass(frozen=True, slots=True)
@@ -35,6 +45,16 @@ class Identifier:
 
 
 @dataclass(frozen=True, slots=True)
+class AuthorizationContextId(Identifier):
+    """Identify an immutable authorization context without carrying permission."""
+
+
+@dataclass(frozen=True, slots=True)
+class CapabilitySnapshotId(Identifier):
+    """Identify one immutable capability-discovery snapshot."""
+
+
+@dataclass(frozen=True, slots=True)
 class CorrelationId(Identifier):
     """Identify operations that belong to the same logical activity."""
 
@@ -45,5 +65,20 @@ class RequestId(Identifier):
 
 
 @dataclass(frozen=True, slots=True)
+class RoutingDecisionId(Identifier):
+    """Identify one immutable routing decision."""
+
+
+@dataclass(frozen=True, slots=True)
 class RunId(Identifier):
     """Identify a single execution or processing run."""
+
+
+@dataclass(frozen=True, slots=True)
+class SecurityPolicyRevisionId(Identifier):
+    """Identify the authoritative security-policy revision used by a decision."""
+
+
+@dataclass(frozen=True, slots=True)
+class SubstrateId(Identifier):
+    """Identify a routable intelligence substrate across component boundaries."""
