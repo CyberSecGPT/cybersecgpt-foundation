@@ -1,5 +1,9 @@
 """Tests for the public package version."""
 
+import subprocess
+import sys
+from pathlib import Path
+
 import cybersecgpt
 import cybersecgpt.foundation as foundation
 
@@ -68,6 +72,24 @@ def test_public_versions_are_canonical() -> None:
 def test_top_level_package_exports_only_version() -> None:
     """Keep the top-level package API limited to version metadata."""
     assert cybersecgpt.__all__ == ["__version__"]
+
+
+def test_top_level_package_discovers_sibling_distribution(tmp_path: Path) -> None:
+    """Allow separately distributed ``cybersecgpt.*`` packages to coexist."""
+    sibling_package = tmp_path / "cybersecgpt"
+    sibling_package.mkdir()
+    (sibling_package / "sibling_probe.py").write_text(
+        "VALUE = 'visible'\n",
+        encoding="utf-8",
+    )
+
+    probe = (
+        "import sys\n"
+        f"sys.path.insert(0, {str(tmp_path)!r})\n"
+        "import cybersecgpt.sibling_probe as sibling_probe\n"
+        "assert sibling_probe.VALUE == 'visible'\n"
+    )
+    subprocess.run([sys.executable, "-c", probe], check=True)
 
 
 def test_foundation_package_exports_public_primitives() -> None:
